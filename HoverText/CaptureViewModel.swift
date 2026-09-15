@@ -7,6 +7,7 @@ final class CaptureViewModel: ObservableObject {
     @Published var draftText: String = ""
     @Published var attachments: [PastedImage] = []
     @Published var focusTick: Int = 0
+    @Published private(set) var sessionRevision: Int = 0
     // ponytail: normal save/discard cleans these; add Pending-directory startup cleanup only if crash leftovers matter.
     private var importedImageURLs = Set<URL>()
 
@@ -14,6 +15,7 @@ final class CaptureViewModel: ObservableObject {
         draftText = ""
         attachments.removeAll()
         importedImageURLs.removeAll()
+        sessionRevision &+= 1
     }
 
     func requestFocus() {

@@ -133,6 +133,8 @@ private struct RichCaptureEditor: NSViewRepresentable {
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         context.coordinator.onImageInserted = onImageInserted
         guard let textView = context.coordinator.textView else { return }
+        let sessionChanged = context.coordinator.lastSessionRevision != viewModel.sessionRevision
+        context.coordinator.lastSessionRevision = viewModel.sessionRevision
 
         if viewModel.draftText.isEmpty && viewModel.attachments.isEmpty && textView.textStorage?.length != 0 {
             textView.textStorage?.setAttributedString(NSAttributedString())
@@ -141,6 +143,9 @@ private struct RichCaptureEditor: NSViewRepresentable {
         }
 
         context.coordinator.insertNewAttachments(from: viewModel.attachments)
+        if sessionChanged {
+            textView.undoManager?.removeAllActions()
+        }
 
         if context.coordinator.lastFocusTick != viewModel.focusTick {
             context.coordinator.lastFocusTick = viewModel.focusTick
@@ -157,6 +162,7 @@ private struct RichCaptureEditor: NSViewRepresentable {
         weak var textView: NSTextView?
         var insertedAttachmentIDs = Set<URL>()
         var lastFocusTick = 0
+        var lastSessionRevision = -1
 
         init(viewModel: CaptureViewModel, onImageInserted: @escaping (CGFloat) -> Void) {
             self.viewModel = viewModel
